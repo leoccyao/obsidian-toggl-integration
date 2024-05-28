@@ -17,6 +17,9 @@ export interface PluginSettings {
   /** Update the day's total time in real-time in the sidebar */
   updateInRealTime?: boolean;
 
+  /** Interval for automatically refreshing connection to the Toggl API, in seconds */
+  autoRefreshInterval?: number;
+
   /**
    * The max. allowed characters in the title of a timer in
    * the status bar.

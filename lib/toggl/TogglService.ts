@@ -73,6 +73,7 @@ export default class TogglService {
 
   private _currentTimerInterval: number = null;
   private _statusBarInterval: number = null;
+  private _apiRefreshInterval: number = null;
   private _currentTimeEntry: TimeEntry = null;
   private _ApiAvailable = ApiStatus.UNTESTED;
 
@@ -94,6 +95,22 @@ export default class TogglService {
     this._ApiAvailable = status;
     apiStatusStore.set(status);
   }
+
+  /**
+   * Creates a new interval to automatically refresh the API.
+   * Deletes the current interval without creating a new one for zero/negative intervals.
+   * @param interval the interval to refresh at
+   */
+  public async setRefreshInterval(interval: number) {
+    window.clearInterval(this._apiRefreshInterval);
+
+    if (interval > 0) {
+      this._apiRefreshInterval = window.setInterval(() => {
+        this.refreshApiConnection(this._plugin.settings.apiToken);
+      }, 1000 * interval);
+    }
+  }
+
 
   /**
    * Creates a new toggl client object using the passed API token.
