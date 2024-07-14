@@ -108,6 +108,7 @@ export default class TogglService {
       this._apiRefreshInterval = window.setInterval(() => {
         this.refreshApiConnection(this._plugin.settings.apiToken);
       }, 1000 * interval);
+      this._plugin.registerInterval(this._apiRefreshInterval)
     }
   }
 
