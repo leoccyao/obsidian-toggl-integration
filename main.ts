@@ -28,6 +28,7 @@ export default class MyPlugin extends Plugin {
     this.toggl = new TogglService(this);
     if (this.settings.apiToken != null || this.settings.apiToken != "") {
       this.toggl.refreshApiConnection(this.settings.apiToken);
+      this.toggl.setRefreshInterval(this.settings.autoRefreshInterval);
       this.input = new UserInputHelper(this);
     }
 
