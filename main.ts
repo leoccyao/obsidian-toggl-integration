@@ -4,7 +4,9 @@ import { CODEBLOCK_LANG } from "lib/constants";
 import reportBlockHandler from "lib/reports/reportBlockHandler";
 import TogglService from "lib/toggl/TogglService";
 import TogglSettingsTab from "lib/ui/TogglSettingsTab";
-import TogglReportView, { VIEW_TYPE_REPORT } from "lib/ui/views/TogglReportView";
+import TogglReportView, {
+  VIEW_TYPE_REPORT,
+} from "lib/ui/views/TogglReportView";
 import UserInputHelper from "lib/util/UserInputHelper";
 import { settingsStore, versionLogDismissed } from "lib/util/stores";
 import { Plugin, WorkspaceLeaf } from "obsidian";
@@ -25,7 +27,7 @@ export default class MyPlugin extends Plugin {
     // instantiate toggl class and set the API token if set in settings.
     this.toggl = new TogglService(this);
     if (this.settings.apiToken != null || this.settings.apiToken != "") {
-      this.toggl.setToken(this.settings.apiToken);
+      this.toggl.refreshApiConnection(this.settings.apiToken);
       this.input = new UserInputHelper(this);
     }
 
@@ -83,7 +85,9 @@ export default class MyPlugin extends Plugin {
           active: true,
           type: VIEW_TYPE_REPORT,
         });
-        this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(VIEW_TYPE_REPORT)[0]);
+        this.app.workspace.revealLeaf(
+          this.app.workspace.getLeavesOfType(VIEW_TYPE_REPORT)[0],
+        );
       },
       id: "show-report-view",
       name: "Open report view",
@@ -92,7 +96,7 @@ export default class MyPlugin extends Plugin {
     this.addCommand({
       checkCallback: (checking: boolean) => {
         if (!checking) {
-          this.toggl.setToken(this.settings.apiToken);
+          this.toggl.refreshApiConnection(this.settings.apiToken);
         } else {
           return this.settings.apiToken != null || this.settings.apiToken != "";
         }

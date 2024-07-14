@@ -80,33 +80,41 @@ export default class TogglService {
     this._statusBarItem = this._plugin.addStatusBarItem();
     this._statusBarItem.setText("Connecting to Toggl...");
 
-    this._plugin.registerDomEvent(
-      this._statusBarItem, "click", () => {
-        new Notice('Reconnecting to Toggl...')
-        this.setToken(this._plugin.settings.apiToken)
-      }
-    )
+    this._plugin.registerDomEvent(this._statusBarItem, "click", () => {
+      this.refreshApiConnection(this._plugin.settings.apiToken);
+    });
     // Store a reference to the manager in a svelte store to avoid passing
     // of references around the component trees.
     togglService.set(this);
     apiStatusStore.set(ApiStatus.UNTESTED);
   }
 
+  private _setApiStatus(status: ApiStatus) {
+    this._ApiAvailable = status;
+    apiStatusStore.set(status);
+  }
+
   /**
    * Creates a new toggl client object using the passed API token.
    * @param token the API token for the client.
    */
-  public async setToken(token: string) {
+  public async refreshApiConnection(token: string) {
+    this._setApiStatus(ApiStatus.UNTESTED);
+    this._statusBarItem.setText("Connecting to Toggl...");
+    if (this._apiManager != null) {
+      new Notice("Reconnecting to Toggl...");
+    }
+
     window.clearInterval(this._currentTimerInterval);
     if (token != null && token != "") {
       try {
         this._apiManager = new TogglAPI();
         await this._apiManager.setToken(token);
-        this._ApiAvailable = ApiStatus.AVAILABLE;
+        this._setApiStatus(ApiStatus.AVAILABLE);
       } catch {
         console.error("Cannot connect to toggl API.");
         this._statusBarItem.setText("Cannot connect to Toggl API");
-        this._ApiAvailable = ApiStatus.UNREACHABLE;
+        this._setApiStatus(ApiStatus.UNREACHABLE);
         this.noticeAPINotAvailable();
         return;
       }
@@ -120,7 +128,7 @@ export default class TogglService {
         .then((response) => setDailySummaryItems(response));
     } else {
       this._statusBarItem.setText("Open settings to add a Toggl API token.");
-      this._ApiAvailable = ApiStatus.NO_TOKEN;
+      this._setApiStatus(ApiStatus.NO_TOKEN);
       this.noticeAPINotAvailable();
     }
     apiStatusStore.set(this._ApiAvailable);
@@ -202,14 +210,14 @@ export default class TogglService {
     try {
       curr = await this._apiManager.getCurrentTimer();
       if (this._ApiAvailable === ApiStatus.DEGRADED) {
-        this._ApiAvailable = ApiStatus.AVAILABLE;
+        this._setApiStatus(ApiStatus.AVAILABLE);
       }
     } catch (err) {
       console.error("Error reaching Toggl API");
       console.error(err);
       if (this._ApiAvailable !== ApiStatus.DEGRADED) {
         new Notice("Error updating active Toggl time entry. Retrying...");
-        this._ApiAvailable = ApiStatus.DEGRADED;
+        this._setApiStatus(ApiStatus.DEGRADED);
       }
       return;
     }
@@ -272,6 +280,11 @@ export default class TogglService {
    * state (e.g. details of current timer).
    */
   private updateStatusBarText() {
+    if (this._ApiAvailable === ApiStatus.UNTESTED) {
+      this._statusBarItem.setText("Connecting to Toggl...");
+      return;
+    }
+
     let timer_msg = null;
     if (this._currentTimeEntry == null) {
       timer_msg = "-";

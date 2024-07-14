@@ -47,7 +47,7 @@ export default class TogglSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.apiToken || "")
           .onChange(async (value) => {
             this.plugin.settings.apiToken = value;
-            this.plugin.toggl.setToken(value);
+            this.plugin.toggl.refreshApiConnection(value);
             await this.plugin.saveSettings();
           }),
       );
