@@ -17,7 +17,7 @@ export interface PluginSettings {
   /** Update the day's total time in real-time in the sidebar */
   updateInRealTime?: boolean;
 
-  /** Interval for automatically refreshing connection to the Toggl API, in seconds */
+  /** Interval for automatically refreshing connection to the Toggl API, in minutes */
   autoRefreshInterval?: number;
 
   /**

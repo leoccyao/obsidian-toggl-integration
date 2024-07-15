@@ -99,7 +99,7 @@ export default class TogglService {
   /**
    * Creates a new interval to automatically refresh the API.
    * Deletes the current interval without creating a new one for zero/negative intervals.
-   * @param interval the interval to refresh at
+   * @param interval the interval to refresh at, in minutes
    */
   public async setRefreshInterval(interval: number) {
     window.clearInterval(this._apiRefreshInterval);
@@ -107,7 +107,7 @@ export default class TogglService {
     if (interval > 0) {
       this._apiRefreshInterval = window.setInterval(() => {
         this.refreshApiConnection(this._plugin.settings.apiToken);
-      }, 1000 * interval);
+      }, 60000 * interval);
       this._plugin.registerInterval(this._apiRefreshInterval)
     }
   }

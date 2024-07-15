@@ -120,7 +120,7 @@ export default class TogglSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("API connection auto refresh interval")
       .setDesc(
-        "Interval to automatically refresh connection to the Toggl API (in seconds). " +
+        "Interval to automatically refresh connection to the Toggl API (in minutes). " +
           "Set to 0 to disable auto-refresh.",
       )
       .addText((text) => {
