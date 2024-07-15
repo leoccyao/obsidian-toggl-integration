@@ -83,7 +83,7 @@ export default class TogglService {
     this._statusBarItem.setText("Connecting to Toggl...");
 
     this._plugin.registerDomEvent(this._statusBarItem, "click", () => {
-      this.refreshApiConnection(this._plugin.settings.apiToken);
+      this.refreshApiConnection(this._plugin.settings.apiToken, this._plugin.settings.autoRefreshInterval);
     });
     // Store a reference to the manager in a svelte store to avoid passing
     // of references around the component trees.
@@ -96,36 +96,24 @@ export default class TogglService {
     apiStatusStore.set(status);
   }
 
-  /**
-   * Creates a new interval to automatically refresh the API.
-   * Deletes the current interval without creating a new one for zero/negative intervals.
-   * @param interval the interval to refresh at, in minutes
-   */
-  public async setRefreshInterval(interval: number) {
-    window.clearInterval(this._apiRefreshInterval);
-
-    if (interval > 0) {
-      this._apiRefreshInterval = window.setInterval(() => {
-        this.refreshApiConnection(this._plugin.settings.apiToken);
-      }, 60000 * interval);
-      this._plugin.registerInterval(this._apiRefreshInterval)
-    }
-  }
-
 
   /**
    * Creates a new toggl client object using the passed API token.
-   * @param token the API token for the client.
-   */
-  public async refreshApiConnection(token: string) {
-    this._setApiStatus(ApiStatus.UNTESTED);
-    this._statusBarItem.setText("Connecting to Toggl...");
-    if (this._apiManager != null) {
-      new Notice("Reconnecting to Toggl...");
+   * Creates a new interval to automatically refresh the API.
+   * Deletes the current interval without creating a new one for zero/negative intervals.
+   * @param token the API token for the client
+   * @param interval the interval to refresh at, in minutes
+  */
+ public async refreshApiConnection(token: string, interval: number) {
+   this._setApiStatus(ApiStatus.UNTESTED);
+   this._statusBarItem.setText("Connecting to Toggl...");
+   if (this._apiManager != null) {
+     new Notice("Reconnecting to Toggl...");
     }
-
+    
     window.clearInterval(this._currentTimerInterval);
     window.clearInterval(this._statusBarInterval);
+    window.clearInterval(this._apiRefreshInterval);
     if (token != null && token != "") {
       try {
         this._apiManager = new TogglAPI();
@@ -153,6 +141,13 @@ export default class TogglService {
       this.noticeAPINotAvailable();
     }
     apiStatusStore.set(this._ApiAvailable);
+
+    if (interval > 0) {
+      this._apiRefreshInterval = window.setInterval(() => {
+        this.refreshApiConnection(this._plugin.settings.apiToken, this._plugin.settings.autoRefreshInterval);
+       }, 60000 * interval);
+       this._plugin.registerInterval(this._apiRefreshInterval)
+     }
   }
 
   /** Throws an Error when the Toggl Track API cannot be reached. */

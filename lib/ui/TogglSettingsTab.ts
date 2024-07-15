@@ -58,8 +58,7 @@ export default class TogglSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.apiToken || "")
           .onChange(async (value) => {
             this.plugin.settings.apiToken = value;
-            this.plugin.toggl.refreshApiConnection(value);
-            await this.plugin.toggl.setRefreshInterval(this.plugin.settings.autoRefreshInterval);
+            this.plugin.toggl.refreshApiConnection(value, this.plugin.settings.autoRefreshInterval);
             await this.plugin.saveSettings();
           }),
       );
@@ -131,7 +130,7 @@ export default class TogglSettingsTab extends PluginSettingTab {
           this.plugin.settings.autoRefreshInterval = (
             value !== "" ? Number(value) : DEFAULT_SETTINGS.autoRefreshInterval
           );
-          await this.plugin.toggl.setRefreshInterval(this.plugin.settings.autoRefreshInterval);
+          await this.plugin.toggl.refreshApiConnection(this.plugin.settings.apiToken, this.plugin.settings.autoRefreshInterval)
           await this.plugin.saveSettings();
         });
     });
