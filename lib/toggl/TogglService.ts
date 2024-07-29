@@ -104,10 +104,10 @@ export default class TogglService {
    * @param token the API token for the client
    * @param interval the interval to refresh at, in minutes
   */
- public async refreshApiConnection(token: string, interval: number) {
+ public async refreshApiConnection(token: string, interval: number, notify = true) {
    this._setApiStatus(ApiStatus.UNTESTED);
    this._statusBarItem.setText("Connecting to Toggl...");
-   if (this._apiManager != null) {
+   if (notify && this._apiManager != null) {
      new Notice("Reconnecting to Toggl...");
     }
     
@@ -144,7 +144,11 @@ export default class TogglService {
 
     if (interval > 0) {
       this._apiRefreshInterval = window.setInterval(() => {
-        this.refreshApiConnection(this._plugin.settings.apiToken, this._plugin.settings.autoRefreshInterval);
+        this.refreshApiConnection(
+          this._plugin.settings.apiToken,
+          this._plugin.settings.autoRefreshInterval,
+          notify = false,
+        );
        }, 60000 * interval);
        this._plugin.registerInterval(this._apiRefreshInterval)
      }
