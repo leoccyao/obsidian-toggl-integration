@@ -74,6 +74,7 @@ export default class TogglService {
   private _currentTimerInterval: number = null;
   private _statusBarInterval: number = null;
   private _apiRefreshInterval: number = null;
+  private _apiRefreshTimeout: number = null;
   private _currentTimeEntry: TimeEntry = null;
   private _ApiAvailable = ApiStatus.UNTESTED;
 
@@ -113,7 +114,24 @@ export default class TogglService {
     
     window.clearInterval(this._currentTimerInterval);
     window.clearInterval(this._statusBarInterval);
-    window.clearInterval(this._apiRefreshInterval);
+
+    if (interval != this._apiRefreshTimeout){
+      window.clearInterval(this._apiRefreshInterval);
+
+      if (interval > 0) {
+        this._apiRefreshInterval = window.setInterval(() => {
+          this.refreshApiConnection(
+            this._plugin.settings.apiToken,
+            this._plugin.settings.autoRefreshInterval,
+            notify = false,
+          );
+        }, 60000 * interval);
+        this._plugin.registerInterval(this._apiRefreshInterval)
+      }
+
+      this._apiRefreshTimeout = interval
+    }
+
     if (token != null && token != "") {
       try {
         this._apiManager = new TogglAPI();
@@ -141,17 +159,6 @@ export default class TogglService {
       this.noticeAPINotAvailable();
     }
     apiStatusStore.set(this._ApiAvailable);
-
-    if (interval > 0) {
-      this._apiRefreshInterval = window.setInterval(() => {
-        this.refreshApiConnection(
-          this._plugin.settings.apiToken,
-          this._plugin.settings.autoRefreshInterval,
-          notify = false,
-        );
-       }, 60000 * interval);
-       this._plugin.registerInterval(this._apiRefreshInterval)
-     }
   }
 
   /** Throws an Error when the Toggl Track API cannot be reached. */
