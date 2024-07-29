@@ -2,7 +2,7 @@ import type { PluginSettings } from "./PluginSettings";
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   apiToken: null,
-  autoRefreshInterval: 1,
+  autoRefreshInterval: true,
   charLimitStatusBar: 40,
   statusBarFormat: "m [minute]",
   statusBarNoEntryMesssage: "-",

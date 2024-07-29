@@ -117,23 +117,19 @@ export default class TogglSettingsTab extends PluginSettingTab {
 
   private addAutoRefreshIntervalSetting(containerEl: HTMLElement) {
     new Setting(containerEl)
-      .setName("API connection auto refresh interval")
+      .setName("API connection auto refresh")
       .setDesc(
-        "Interval to automatically refresh connection to the Toggl API (in minutes). " +
-          "Set to 0 to disable auto-refresh.",
+        "Automatically refresh connection to the Toggl API every 3 minutes."
       )
-      .addText((text) => {
-        text.setPlaceholder(String(DEFAULT_SETTINGS.autoRefreshInterval))
-        text.inputEl.type = "number"
-        text.setValue(String(this.plugin.settings.autoRefreshInterval))
-        text.onChange(async (value) => {
-          this.plugin.settings.autoRefreshInterval = (
-            value !== "" ? Number(value) : DEFAULT_SETTINGS.autoRefreshInterval
-          );
-          await this.plugin.toggl.refreshApiConnection(this.plugin.settings.apiToken, this.plugin.settings.autoRefreshInterval)
-          await this.plugin.saveSettings();
-        });
-    });
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.autoRefreshInterval || true)
+          .onChange(async (value) => {
+            this.plugin.settings.autoRefreshInterval = value;
+            await this.plugin.toggl.refreshApiConnection(this.plugin.settings.apiToken, this.plugin.settings.autoRefreshInterval)
+            await this.plugin.saveSettings();
+          })
+      });
   }
 
   private addCharLimitStatusBarSetting(containerEl: HTMLElement) {
